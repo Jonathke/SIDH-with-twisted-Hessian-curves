@@ -1,0 +1,137 @@
+include("twihes.jl")
+
+############################
+#
+# Parameters
+#
+############################
+
+#Prime and field
+const la = big(2)
+const lb = big(3)
+const ea = 216
+const eb = 137
+const f = big(1)
+const p = la^ea*lb^eb*f-1
+const F = Fp2(p)
+
+#cuberoot of One
+const w = F(big(12219711830672610775954572505728746809542890121880798255662903668102610619665988362985108335914309222949359513346442469671157366783), big(135386734010422587503378390191196800823739277475761521929144500224))
+if !isone(w^3)
+    error("w is not a cuberoot...")
+end
+#Starting curve: a = 1 for speed, solve for d to get j(E) = some supersingular j-invariant. See sage-script
+#Starting j-invariant = 5702681906229397736571208168730597218841771182068607363012495368783811960451290199144048511710513330491154162554165612875578186045 + 11292954658165168594540806597275418065092829163594222845945603320303544727762659624084534150186308536417156420167218345228839994074*i
+#See sage script for construction of d0 from j-Invariant and a0
+const a0 = one(F)
+const d0 = F(big(219385922741314142691951261586269668302223402600131893711006618643854082018527224312489320097711699701534967947124705531888751377), big(22455475226486656242193335117764454514029686578831578285160935079277915330382014917805219451047037349751164063364002803448384614447))
+
+
+#Generates torsion basises from random points
+function genTorsionBasis(alicePX, alicePY, aliceQX, aliceQY, bobPX, bobPY, bobQX, bobQY)
+    Z = one(F)
+    aliceP = EC(alicePX, alicePY, Z)
+    aliceQ = EC(aliceQX, aliceQY, Z)
+
+    if !isValid(aliceP, a0, d0)
+        error("Alice' P is not a valid point!")
+    end
+
+    if !isValid(aliceQ, a0, d0)
+        error("Alice' Q is not a valid point!")
+    end
+
+    Pa = normalized(mul(f*lb^eb, aliceP, a0))
+    Qa = normalized(mul(f*lb^eb, aliceQ, a0))
+
+    Patest = doublePow(Pa, a0, ea-1)
+    Qatest = doublePow(Qa, a0, ea-1)
+
+    if !isIdentity(double(Patest, a0))
+        error("Pa : Something does not look right with the order of the curve...")
+    end
+
+    if !isIdentity(double(Qatest, a0))
+        error("Qa : Something does not look right with the order of the curve...")
+    end
+
+    if isIdentity(Patest)
+        error("Alice' point Pa does not have the right order!")
+    end
+    if isIdentity(Qatest)
+        error("Alice' point Qa does not have the right order!")
+    end
+
+    if Patest == Qatest
+        error("Alice' points are not independent!")
+    end
+
+    bobP = EC(bobPX, bobPY, Z)
+    bobQ = EC(bobQX, bobQY, Z)
+
+    if !isValid(bobP, a0, d0)
+        error("Bob's P is not a valid point!")
+    end
+
+    if !isValid(bobQ, a0, d0)
+        error("Bob's Q is not a valid point!")
+    end
+
+    Pb = normalized(mul(f*la^ea, bobP, a0))
+    Qb = normalized(mul(f*la^ea, bobQ, a0))
+
+    Pbtest = triplePow(Pb, a0, d0, eb-1)
+    Qbtest = triplePow(Qb, a0, d0, eb-1)
+
+    if !isIdentity(triple(Pbtest, a0, d0))
+        error("Pb : Something does not look right with the order of the curve...")
+    end
+
+    if !isIdentity(triple(Qbtest, a0, d0))
+        error("Qb : Something does not look right with the order of the curve...")
+    end
+
+    if isIdentity(Pbtest)
+        error("Bob's point Pb does not have the right order!")
+    end
+
+    if isIdentity(Qbtest)
+        error("Bob's point Qb does not have the right order!")
+    end
+
+    if Pbtest == Qbtest
+        error("Bob's points are not independent!")
+    end
+
+    return Pa, Qa, Pb, Qb
+end
+
+#See sage script for generating random points
+PX1 = F(big(5533098712470456388492885922259417237069044709835817645792434822311181910180669356792303079954354894191430152691370436350851387342), big(18473067945911687513777865155604289224636528747461102680944088915981149014271897566993566632313079233916543628649980117617897460175))
+PY1 = F(big(1536920810924872946860382155434707509475393691592734008951351996316483274302852137569484178085371626039370712286652512416116437043), big(6845801754554358768522859014673009157530373741686066330673615131290976032195305025145175332358053181920002077462292085676466008127))
+QX1 = F(big(4539631341790570567304707153022517503081099671595163400867876390539015009616163176244737328214740702691612401825625570049083701325), big(20717297798423078909929263689612783576838012807872301301580491601187869937658675152291895141436158451273728923765390845156557329970))
+QY1 = F(big(966904597052951079346757998395793866557895690647749288069091806506390799311468973108293480008784041251742425796727529770401496307), big(21502899060556422272839386496292920660601405905391793226907305013243633613340312018074730054387993862474361015308782634395635317036))
+PX2 = F(big(8993480562388299523637023191543247497849159841483944119784842234309911098731543850029834560472577233030505130003299079378233540678), big(952948349967253787394138660595614142279401582796809928868273265490457117013634279587130922479964902391856277650478578235277923739))
+PY2 = F(big(6471153596775953007093773659998870609680717621782146049561621402764261756467504363463936414985445888090215358768282020434098984430), big(4517893758850668870383730382005115395788316666185372344001892293143905057637017851847995347371344832671883901899961213393847775429))
+QX2 = F(big(2870410151509165333491135601691167282602376128674766470454972925342381125988561564914257273029905722943147663770637394872276113256), big(10424053760203636089749987947815191636036962070477308721134754808927048889985096282632152543083824094471596825537257615109856036922))
+QY2 = F(big(6137428875084379281778302891205974420611338054352623642481338287085564129445643052889007804993100371737814864736360438805522310774), big(1163972651145008888226691138719485605432026448770048104875167557039067083981585875190161562500466626417131086448077607858019003085))
+const Pa, Qa, Pb, Qb = genTorsionBasis(PX1, PY1, QX1, QY1, PX2, PY2, QX2, QY2)
+
+# Compute the optimal strategy of size n, given weights p and q
+function computeStrat(n, p, q)
+    S = Dict{Int64, Array{Int64, 1}}()
+    C = Dict{Int64, Int64}()
+    S[1] = []
+    C[1] = 0
+    for i in 2:n
+        b = argmin([C[i-b] + C[b] + b*p + (i-b)*q for b in 1:i-1])
+        S[i] = append!(append!([b], S[i-b]), S[b])
+        C[i] = C[i-b] + C[b] + b*p + (i-b)*q
+    end
+    return S[n]
+end
+
+#The weights are estimated using @benchmark
+const strat_A = Vector(computeStrat(ea, 23358, 32132))
+
+const strat_B = Vector(computeStrat(eb, 45620, 34278))
