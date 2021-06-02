@@ -1,2 +1,50 @@
-# SIDH-with-twisted-Hessian-curves
-Instantiating SIDH with twisted Hessian curves
+# SIDH with twisted Hessian curves
+
+This repository contains some implementations of the Supersingular Isogeny Diffie-Hellman key-exchange, instantiated with twisted Hessian curves. The code is related to my master thesis at NTNU.
+
+Three parts are provided. They are sectioned as follows:
+
+```
+optimizedImplementation: Contains a straightforward implementation of SIDH using twisted Hessian curves
+optimizedExperimental: Contains an experimental implementation, where one torsion-group is not F_{p^2} rational
+otherTools: Contains a more rigorous mathematical framework which was used in the early parts of the implementation.
+```
+
+The code provided should not be used for real-world applications under any circumstance, as there likely exist bugs and vulnerabilities (e.g. countermeasures against side-channel attacks were not considered when implementing).
+
+To run the code, change directory to the one you want to test, and type the following:
+
+```
+julia sidh*.jl
+```
+And follow the commands from there (of course, make sure that you have a Julia compiler installed).
+
+An example run is given below:
+
+```
+$ cd OptimizedExperimental/Fp2adjoined_omega
+$ julia sidh*.jl
+Which parameter-sets do you want?
+[1] p132, [2] p434, [3] p503, [4] p610, [5] p751
+> 2
+What do you want to do?
+[1] Run as example, [2] Benchmark Alice, [3] Benchmark Bob, [4] Close
+> 1
+Alice' secret: 65474501351613142582321623207815217815201253731642893091159383985265
+Bob's secret: [4, 4, 3, 4, 3, 2, 4, 2, 4, 2, 4, 3, 2, 2, 2, 4, 2, 3, 4, 4, 3, 3, 4, 3, 3, 4, 3, 4, 2, 3, 2, 3, 3, 4, 4, 2, 3, 2, 4, 2, 4, 4, 2, 4, 3, 4, 4, 3, 3, 4, 4, 2, 2, 4, 3, 2, 3, 4, 3, 3, 2, 2, 4, 4, 2, 3, 3, 2, 3, 3, 2, 4, 2, 2, 2, 4, 4, 3, 3, 2, 3, 3, 2, 4, 3, 4, 3, 2, 2, 2, 4, 2, 2, 3, 2, 2, 4, 4, 2, 2, 2, 2, 4, 3, 3, 2, 3, 2, 2, 2, 2, 3, 4, 4, 4, 2, 4, 4, 3, 3, 4, 4, 4, 3, 3, 3, 2, 3, 4, 3, 4, 3, 3, 2, 4, 2, 4]
+
+Alice sends:
+E_A : (1 + 0*w)X^3 + Y^3 + Z^3 = (20488385566358175399768018741632421518681965660150425072201630499374 + 25583239305235349449887236117611335568708577716686483692187090076118*w)XYZ
+
+Bob sends:
+P_A = (53534337302773834619268070791132612777629030190444430832708743574421 + 76566312738804292304729518612259715896199580718028090383010872633947*w : 81915844061180559976593547514469947253892576321529369484456701960190 + 81270976761714804043993891118958859886158118605667684593109732993112*w : 27558078668580627500417567371886114035613362248390428304155011696474 + 39361096071386661531325610236298308887556059218786340102434115567340*w)
+Q_A = (23553813931976369024119867020162739319504894419458356193647911461515 + 60652523608089052224990557630920438937578507395692490279387226788655*w : 63206769486324456237513093475836808451172755296729586868460385255393 + 73667465461024336893648227489854232863388432722390757679908809645780*w : 55251352593834791618525279364066731361142832366363934641230183948221 + 1745396339037633858335846732546413730378135093055834991010288972496*w)
+E_B : (1 + 0*w)X^3 + Y^3 + Z^3 = (8072956271583530112912309870107853685442795689539432883385815933785 + 48599669197963657380209219713072737284250146156497523018732826259276*w)XYZ
+
+--------------------------------
+
+Results:
+key_a : 48202706713499664106987066390840526055658351079945901097091557877445 + 80874710488261880721043953134818508999854922984462790861439737846744*w
+key_b : 48202706713499664106987066390840526055658351079945901097091557877445 + 80874710488261880721043953134818508999854922984462790861439737846744*w
+```
+
